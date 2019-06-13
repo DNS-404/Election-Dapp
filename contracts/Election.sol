@@ -7,43 +7,52 @@ contract Election {
 		uint8 vote;
 	}
 
+	// Modifier
+	modifier onlyOwner() {
+		require(msg.sender == admin);
+		_;
+	}
+
 	address public admin;
 	mapping(address => Voter) public voters;
-	uint[10] public proposals;
+	uint[10] public parties;
 
 	// Decide admin
 	function Election() public {
 		admin = msg.sender;
 	}
 
-	// Register a voter
-	function register(address toVoter) public {
+	// Allow admin to register a voter
+	function register(address toVoter) public onlyOwner{
 		// Revert if already registered
 		if(voters[toVoter].weight != 0) revert();
 		voters[toVoter].weight = 1; // ONE vote per person
 		voters[toVoter].voted = false;
 	}
 
-	function vote(uint8 toProposal) public {
+	// Allow a voter to vote to a party
+	function vote(uint8 toParty) public {
 		Voter storage sender = voters[msg.sender];
-		// Limited to 10 proposals only
-		if(sender.voted || toProposal >= 10 || sender.weight == 0)
+		// Limited to 10 parties only
+		if(sender.voted || toParty >= 10 || sender.weight == 0)
 			revert();
 		sender.voted = true;
-		sender.vote = toProposal;
-		proposals[toProposal] += sender.weight;
+		sender.vote = toParty;
+		parties[toParty] += sender.weight;
 	}
 
-	function winningProposal() public constant returns (uint8 _winningProposal) {
+	// Find the winning party
+	function winningParty() public constant returns (uint8 _winningParty) {
 		uint256 winningVoteCount = 0;
-		for(uint8 prop = 0; prop < 10; prop++)
-			if(proposals[prop] > winningVoteCount){
-				winningVoteCount = proposals[prop];
-				_winningProposal = prop;
+		for(uint8 num = 0; num < 10; num++)
+			if(parties[num] > winningVoteCount){
+				winningVoteCount = parties[num];
+				_winningParty = num;
 			}
 	}
 
+
 	function getCount() public constant returns (uint[4]) {
-		return proposals;
+		return parties;
 	}
 }
