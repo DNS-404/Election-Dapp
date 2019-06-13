@@ -51,8 +51,8 @@ contract Election {
 			}
 	}
 
-
-	function getCount() public constant returns (uint[4]) {
+	// Get the count of all proposals
+	function getCount() public constant returns (uint[10]) {
 		return parties;
 	}
 }
